@@ -365,7 +365,7 @@
     document.getElementById("passwordQuestionArea").innerHTML=`<div class="success"><b>Password updated.</b> You may now close this window and log in.</div>`;
   };
 
-  function accountView(){return shell(`<h1>My Account</h1><div class="grid"><div class="card"><h3>Rewards Status</h3>${state.currentCustomer?`<p><b>${state.currentCustomer.username||state.currentCustomer.name}</b></p><p>${state.currentCustomer.name}</p><p>${state.currentCustomer.points||0} points</p>`:`<p>Not signed in.</p><button class="btn orange" onclick="go('rewards')">Sign Up or Log In</button>`}</div><div class="card"><h3>Owner Access</h3><p>Prototype password: <b>maurice</b></p><button class="btn dark" onclick="ownerLogin()">Open Dashboard</button></div></div>`)}
+  function accountView(){return shell(`<h1>My Account</h1><div class="grid"><div class="card"><h3>Rewards Status</h3>${state.currentCustomer?`<p><b>${state.currentCustomer.username||state.currentCustomer.name}</b></p><p>${state.currentCustomer.name}</p><p>${state.currentCustomer.points||0} points</p>`:`<p>Not signed in.</p><button class="btn orange" onclick="go('rewards')">Sign Up or Log In</button>`}</div><div class="card"><h3>Owner Access</h3><button class="btn dark" onclick="ownerLogin()">Open Dashboard</button></div></div>`)}
   window.ownerLogin=()=>{if(prompt("Owner password")==="maurice") go("owner")};
   window.setOwnerTab=t=>{state.ownerTab=t;render()};
   window.updateOrderStatus=(id,status)=>{CMOwner.updateOrderStatus(state,id,status);save();render()};
