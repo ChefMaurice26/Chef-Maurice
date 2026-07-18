@@ -1,0 +1,23 @@
+import {useEffect,useState} from 'react'
+import {supabase} from './supabase'
+
+export default function App(){
+ const [session,setSession]=useState(null),[profile,setProfile]=useState(null),[page,setPage]=useState('home'),[msg,setMsg]=useState('')
+ const [form,setForm]=useState({email:'',password:'',username:'',name:'',phone:''})
+ async function profileFor(id){if(!id){setProfile(null);return}const {data}=await supabase.from('profiles').select('*').eq('id',id).single();setProfile(data||null)}
+ useEffect(()=>{supabase.auth.getSession().then(async({data})=>{setSession(data.session);await profileFor(data.session?.user?.id)});const {data:l}=supabase.auth.onAuthStateChange(async(_,s)=>{setSession(s);await profileFor(s?.user?.id)});return()=>l.subscription.unsubscribe()},[])
+ const owner=['owner','manager'].includes(profile?.role)&&profile?.is_active!==false
+ async function login(e){e.preventDefault();setMsg('');const {error}=await supabase.auth.signInWithPassword({email:form.email,password:form.password});setMsg(error?error.message:'Signed in.')}
+ async function signup(e){e.preventDefault();if(!/^(?=.*\d)(?=.*[^A-Za-z0-9]).{6,}$/.test(form.password)){setMsg('Password must be at least 6 characters and include 1 number and 1 special character.');return}const {error}=await supabase.auth.signUp({email:form.email,password:form.password,options:{data:{username:form.username,full_name:form.name,phone:form.phone}}});setMsg(error?error.message:'Account created. Check your email if confirmation is required.')}
+ async function reset(){if(!form.email){setMsg('Enter your email first.');return}const {error}=await supabase.auth.resetPasswordForEmail(form.email,{redirectTo:window.location.origin});setMsg(error?error.message:'Password-reset email requested.')}
+ return <div className="app">
+  <header><button onClick={()=>setPage('home')}>🏠 Home</button><b>Chef Maurice's Kitchen <small>v2 Phase 1</small></b><nav><button onClick={()=>setPage('rewards')}>⭐ Rewards</button><button onClick={()=>setPage('account')}>👤 Account</button>{owner&&<button onClick={()=>setPage('admin')}>🔒 Admin</button>}</nav></header>
+  <main>
+   {page==='home'&&<section className="hero"><div><h1>Chef Maurice's Kitchen</h1><p>Secure Supabase authentication is now being tested separately from the working live app.</p><button onClick={()=>setPage('rewards')}>Access Rewards</button></div><div className="chef">👨🏾‍🍳</div></section>}
+   {page==='rewards'&&!session&&<section className="grid"><form className="card" onSubmit={login}><h2>Log In</h2><label>Email<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label><label>Password<input type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label><button>Log In</button><button type="button" className="link" onClick={reset}>Forgot Password?</button></form><form className="card" onSubmit={signup}><h2>Sign Up</h2><label>Username<input value={form.username} onChange={e=>setForm({...form,username:e.target.value})}/></label><label>Name<input value={form.name} onChange={e=>setForm({...form,name:e.target.value})}/></label><label>Phone<input value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})}/></label><label>Email<input type="email" value={form.email} onChange={e=>setForm({...form,email:e.target.value})}/></label><label>Password<input type="password" value={form.password} onChange={e=>setForm({...form,password:e.target.value})}/></label><button>Create Account</button></form>{msg&&<p className="notice">{msg}</p>}</section>}
+   {page==='rewards'&&session&&<section className="card"><h1>{profile?.points||0} Points</h1><p>{profile?.email||session.user.email}</p><button onClick={()=>supabase.auth.signOut()}>Log Out</button></section>}
+   {page==='account'&&<section className="grid"><div className="card"><h1>My Account</h1>{session?<><p><b>{profile?.username||profile?.full_name}</b></p><p>{profile?.email}</p></>:<p>Not signed in.</p>}</div>{owner&&<div className="card"><h2>Administration</h2><p>Your Supabase owner role is verified.</p><button onClick={()=>setPage('admin')}>Open Admin</button></div>}</section>}
+   {page==='admin'&&(owner?<section className="card"><h1>Secure Owner Dashboard</h1><p>Phase 1 confirms secure owner-only access. Menu and orders come next.</p></section>:<section className="card"><h1>Access denied</h1></section>)}
+  </main>
+ </div>
+}
