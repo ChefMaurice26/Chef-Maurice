@@ -385,6 +385,28 @@
     if(error) alert(error.message);
   };
 
+  window.cloudOwnerLogin=async()=>{
+    const { error }=await CMCloud.signIn({
+      email:ownerLoginEmail.value.trim(),
+      password:ownerLoginPassword.value
+    });
+    if(error){
+      alert(error.message);
+      return;
+    }
+
+    state.cloudSession=CMCloud.currentSession;
+    state.cloudProfile=CMCloud.currentProfile;
+
+    if(!CMCloud.isOwner()){
+      alert("This account does not have owner access.");
+      render();
+      return;
+    }
+
+    await openSecureOwnerDashboard();
+  };
+
   window.cloudLogout=async()=>{ await CMCloud.signOut(); go("home"); };
 
   window.cloudForgotPassword=async()=>{
@@ -450,7 +472,13 @@
       </div>
       ${CMCloud.isOwner()
         ? `<div class="card"><h3>Administration</h3><p>Secure owner account verified.</p><button class="btn dark" onclick="openSecureOwnerDashboard()">Open Dashboard</button></div>`
-        : ``}
+        : `<div class="card">
+            <h3>Owner Login</h3>
+            <p class="muted">Use an owner or manager account to open the dashboard.</p>
+            <label>Email Address<input id="ownerLoginEmail" type="email"></label>
+            <label>Password<input id="ownerLoginPassword" type="password"></label>
+            <button class="btn dark" onclick="cloudOwnerLogin()">Log In as Owner</button>
+          </div>`}
     </div>`);
   }
   window.openSecureOwnerDashboard=async()=>{

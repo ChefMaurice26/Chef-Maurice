@@ -62,7 +62,14 @@
     },
 
     async signIn({email,password}){
-      return client.auth.signInWithPassword({ email, password });
+      const result = await client.auth.signInWithPassword({ email, password });
+      if(!result.error){
+        this.currentSession = result.data.session || null;
+        this.currentProfile = this.currentSession
+          ? await profileFor(this.currentSession.user.id)
+          : null;
+      }
+      return result;
     },
 
     async signOut(){
