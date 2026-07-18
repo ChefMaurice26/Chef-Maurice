@@ -1,18 +1,56 @@
-# Chef Maurice v2 — Phase 1
+import { cpSync, existsSync, mkdirSync, rmSync } from "node:fs";
+import { resolve } from "node:path";
+import { defineConfig } from "vite";
 
-Upload this package only while GitHub is on the `supabase-development` branch.
+const distFolder = "dist";
+const staticPaths = [
+  "index.html",
+  "README.txt",
+  "OPEN-APP.bat",
+  "assets",
+  "css",
+  "data",
+  "js"
+];
+const copyOnlyEntry = "virtual:copy-only-entry";
 
-Do not upload it to `main`.
+function copyAppFiles() {
+  return {
+    name: "copy-app-files",
+    resolveId(id) {
+      if (id === copyOnlyEntry) {
+        return `\0${copyOnlyEntry}`;
+      }
 
-This phase tests:
-- Supabase signup/login
-- Password reset request
-- Profile loading
-- Owner-role recognition
-- Owner-only Admin button
+      return null;
+    },
+    load(id) {
+      if (id === `\0${copyOnlyEntry}`) {
+        return "";
+      }
 
-Vercel must have:
-- VITE_SUPABASE_URL
-- VITE_SUPABASE_PUBLISHABLE_KEY
+      return null;
+    },
+    closeBundle() {
+      rmSync(resolve(distFolder), { recursive: true, force: true });
+      mkdirSync(resolve(distFolder), { recursive: true });
 
-After upload, use the Vercel Preview URL for this branch. Do not promote it to Production yet.
+      for (const path of staticPaths) {
+        const source = resolve(path);
+        if (existsSync(source)) {
+          cpSync(source, resolve(distFolder, path), { recursive: true });
+        }
+      }
+    }
+  };
+}
+
+export default defineConfig({
+  build: {
+    copyPublicDir: false,
+    rollupOptions: {
+      input: copyOnlyEntry
+    }
+  },
+  plugins: [copyAppFiles()]
+});
