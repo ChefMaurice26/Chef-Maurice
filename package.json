@@ -1,6 +1,11 @@
 {
+  "name": "chef-maurice-kitchen-v13",
+  "private": true,
+  "version": "13.0.0",
+  "type": "module",
   "scripts": {
-    "build": "vite build"
+    "build": "vite build",
+    "dev": "vite"
   },
   "devDependencies": {
     "vite": "^7.0.0"

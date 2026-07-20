@@ -5,7 +5,9 @@ import { defineConfig } from "vite";
 const distFolder = "dist";
 const staticPaths = [
   "index.html",
+  "admin.html",
   "README.txt",
+  "README-OWNER-PORTAL.txt",
   "OPEN-APP.bat",
   "assets",
   "css",
@@ -18,23 +20,14 @@ function copyAppFiles() {
   return {
     name: "copy-app-files",
     resolveId(id) {
-      if (id === copyOnlyEntry) {
-        return `\0${copyOnlyEntry}`;
-      }
-
-      return null;
+      return id === copyOnlyEntry ? `\0${copyOnlyEntry}` : null;
     },
     load(id) {
-      if (id === `\0${copyOnlyEntry}`) {
-        return "";
-      }
-
-      return null;
+      return id === `\0${copyOnlyEntry}` ? "" : null;
     },
     closeBundle() {
       rmSync(resolve(distFolder), { recursive: true, force: true });
       mkdirSync(resolve(distFolder), { recursive: true });
-
       for (const path of staticPaths) {
         const source = resolve(path);
         if (existsSync(source)) {
@@ -48,9 +41,7 @@ function copyAppFiles() {
 export default defineConfig({
   build: {
     copyPublicDir: false,
-    rollupOptions: {
-      input: copyOnlyEntry
-    }
+    rollupOptions: { input: copyOnlyEntry }
   },
   plugins: [copyAppFiles()]
 });
