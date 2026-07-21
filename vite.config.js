@@ -6,8 +6,11 @@ const distFolder = "dist";
 const staticPaths = [
   "index.html",
   "admin.html",
+  "reset-password.html",
   "README.txt",
   "README-OWNER-PORTAL.txt",
+  "README-VERSION-13.1.md",
+  "supabase-setup-v13.1.sql",
   "OPEN-APP.bat",
   "assets",
   "css",
