@@ -114,7 +114,7 @@
   window.ownerResetPassword=async()=>{
     const email=document.getElementById("owner-email")?.value.trim();
     if(!email){state.error="Enter your owner email address first.";render();return}
-    const {error}=await supabase.auth.resetPasswordForEmail(email, {
+    const {error}=await client.auth.resetPasswordForEmail(email, {
   redirectTo: window.location.origin + "/reset-password.html"
 });
     if(error){state.error=error.message}else{state.message="A password-reset email was requested. Check your inbox."}
@@ -162,7 +162,10 @@
       ${state.message?`<div class="notice success">${esc(state.message)}</div>`:""}
       <label>Email Address<input id="owner-email" type="email" autocomplete="username" value="frleflore@gmail.com"></label>
       <label>Password<input id="owner-password" type="password" autocomplete="current-password" onkeydown="if(event.key==='Enter')ownerSignIn()"></label>
-      <div class="row"><button class="btn dark" onclick="ownerSignIn()">Sign In</button><button class="btn light" onclick="ownerResetPassword()">Forgot Password?</button></div>
+     <div class="row">
+  <button type="button" class="btn dark" onclick="ownerSignIn()">Sign In</button>
+  <button type="button" class="btn light" onclick="ownerResetPassword()">Forgot Password?</button>
+</div>
       <p class="muted">Customer ordering site: <a href="index.html">Return to Chef Maurice's Kitchen</a></p>
     </div></div>`;
   }
