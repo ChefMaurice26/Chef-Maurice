@@ -93,24 +93,53 @@
     });
   }
 
-  window.ownerSignIn=async()=>{
-    state.error="";state.message="";render();
-    const email=document.getElementById("owner-email")?.value.trim();
-    const password=document.getElementById("owner-password")?.value||"";
-    if(!email||!password){state.error="Enter both your owner email and password.";render();return}
-    const {data,error}=await client.auth.signInWithPassword({email,password});
-    if(error){state.error=error.message;render();return}
-    try{
-      const profile=await getProfile(data.user.id);
-      if(!["owner","manager"].includes(profile.role)||profile.is_active===false){
-        await client.auth.signOut();
-        state.error="This account is valid but does not have owner or manager permission.";
-        render();return;
-      }
-      state.message="Owner account verified.";
-    }catch(error){showError(error)}
-  };
+ window.ownerSignIn=async()=>{
+  state.error="";
+  state.message="";
+  render();
 
+  const email=document.getElementById("owner-email")?.value.trim();
+  const password=document.getElementById("owner-password")?.value||"";
+
+  if(!email||!password){
+    state.error="Enter both your owner email and password.";
+    render();
+    return;
+  }
+
+  const {data,error}=await client.auth.signInWithPassword({
+    email,
+    password
+  });
+
+  if(error){
+    state.error=error.message;
+    render();
+    return;
+  }
+
+  try{
+    const profile=await getProfile(data.user.id);
+
+    if(!["owner","manager"].includes(profile.role)||profile.is_active===false){
+      await client.auth.signOut();
+      state.error="This account is valid but does not have owner or manager permission.";
+      render();
+      return;
+    }
+
+    state.session=data.session;
+    state.profile=profile;
+    state.message="Owner account verified.";
+
+    await refreshData();
+    startRealtime();
+    render();
+
+  }catch(error){
+    showError(error);
+  }
+};
   window.ownerResetPassword=async()=>{
     const email=document.getElementById("owner-email")?.value.trim();
     if(!email){state.error="Enter your owner email address first.";render();return}
