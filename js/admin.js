@@ -115,7 +115,7 @@
     const email=document.getElementById("owner-email")?.value.trim();
     if(!email){state.error="Enter your owner email address first.";render();return}
     const {error}=await supabase.auth.resetPasswordForEmail(email, {
-  redirectTo: window.location.origin + "/reset-password.html"
+  redirectTo: window.location.origin + "/admin.html"
 });
     if(error){state.error=error.message}else{state.message="A password-reset email was requested. Check your inbox."}
     render();
