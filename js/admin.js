@@ -93,13 +93,12 @@
     });
   }
 
- window.ownerSignIn=async()=>{
-  state.error="";
-  state.message="";
-  render();
-
+window.ownerSignIn=async()=>{
   const email=document.getElementById("owner-email")?.value.trim();
   const password=document.getElementById("owner-password")?.value||"";
+
+  state.error="";
+  state.message="";
 
   if(!email||!password){
     state.error="Enter both your owner email and password.";
